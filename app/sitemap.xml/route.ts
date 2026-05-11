@@ -4,6 +4,13 @@ import { listPosts, listAreas } from "@/lib/queries";
 
 export const runtime = "edge";
 
+type SitemapUrl = {
+  loc: string;
+  lastmod?: string;
+  changefreq: string;
+  priority: string;
+};
+
 export async function GET() {
   const host = (await headers()).get("x-resolved-host");
   const resolved = await resolveHost(host);
@@ -18,26 +25,26 @@ export async function GET() {
     listAreas(resolved.clientId),
   ]);
 
-  const staticRoutes = [
+  const allUrls: SitemapUrl[] = [
     { loc: "/", changefreq: "weekly", priority: "1.0" },
     { loc: "/about", changefreq: "monthly", priority: "0.8" },
+    ...areas.map((a) => ({
+      loc: "/areas/" + a.slug,
+      lastmod: a.updated_at ? a.updated_at.slice(0, 10) : undefined,
+      changefreq: "monthly",
+      priority: "0.8",
+    })),
+    ...posts.map((p) => ({
+      loc: "/blog/" + p.slug,
+      lastmod: p.updated_at
+        ? p.updated_at.slice(0, 10)
+        : p.published_at
+        ? p.published_at.slice(0, 10)
+        : undefined,
+      changefreq: "monthly",
+      priority: "0.7",
+    })),
   ];
-
-  const areaUrls = areas.map((a) => ({
-    loc: "/areas/" + a.slug,
-    lastmod: a.updated_at ? a.updated_at.slice(0, 10) : undefined,
-    changefreq: "monthly",
-    priority: "0.8",
-  }));
-
-  const postUrls = posts.map((p) => ({
-    loc: "/blog/" + p.slug,
-    lastmod: p.updated_at ? p.updated_at.slice(0, 10) : p.published_at ? p.published_at.slice(0, 10) : undefined,
-    changefreq: "monthly",
-    priority: "0.7",
-  }));
-
-  const allUrls = [...staticRoutes, ...areaUrls, ...postUrls];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
