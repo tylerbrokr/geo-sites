@@ -1,7 +1,11 @@
 import { supabasePublic } from "./supabase";
-import type { PublicClientProfile, PublicClientMarket, PublicPost, SiteCopy } from "@/types/db";
-
-// All reads scoped by client_id at the application layer.
+import type {
+  PublicClientProfile,
+  PublicClientMarket,
+  PublicPost,
+  SiteCopy,
+  PublicClientArea,
+} from "@/types/db";
 
 export async function getProfile(clientId: string): Promise<PublicClientProfile | null> {
   const { data } = await supabasePublic()
@@ -21,21 +25,38 @@ export async function getMarket(clientId: string): Promise<PublicClientMarket | 
   return data ?? null;
 }
 
-// Phase 2: reads the AI-generated copy for the site via the public_site_copy view.
-// Gated by dns_verified = true (same pattern as other public_* views).
 export async function getSiteCopy(clientId: string): Promise<SiteCopy | null> {
   const { data } = await supabasePublic()
     .from("public_site_copy")
-    .select("client_id, tagline, bio_short, bio_long, area_blurb, meta_title, meta_description")
+    .select("client_id, tagline, bio_short, bio_long, ideal_client_blurb, area_blurb, meta_title, meta_description, og_image_url")
     .eq("client_id", clientId)
     .maybeSingle<SiteCopy>();
+  return data ?? null;
+}
+
+export async function listAreas(clientId: string): Promise<PublicClientArea[]> {
+  const { data } = await supabasePublic()
+    .from("public_client_areas")
+    .select("client_id, slug, area_type, name, state, intro, market_blurb, faqs, meta_title, meta_description, updated_at")
+    .eq("client_id", clientId)
+    .order("name", { ascending: true });
+  return (data ?? []) as PublicClientArea[];
+}
+
+export async function getArea(clientId: string, slug: string): Promise<PublicClientArea | null> {
+  const { data } = await supabasePublic()
+    .from("public_client_areas")
+    .select("client_id, slug, area_type, name, state, intro, market_blurb, faqs, meta_title, meta_description, updated_at")
+    .eq("client_id", clientId)
+    .eq("slug", slug)
+    .maybeSingle<PublicClientArea>();
   return data ?? null;
 }
 
 export async function listPosts(clientId: string, limit = 20): Promise<PublicPost[]> {
   const { data } = await supabasePublic()
     .from("posts")
-    .select("id, client_id, slug, title, excerpt, body, cover_image_url, tag, target_keyword, published_at, created_at")
+    .select("id, client_id, slug, title, excerpt, body, cover_image_url, tag, target_keyword, published_at, created_at, updated_at")
     .eq("client_id", clientId)
     .eq("status", "published")
     .order("published_at", { ascending: false })
@@ -46,7 +67,7 @@ export async function listPosts(clientId: string, limit = 20): Promise<PublicPos
 export async function getPost(clientId: string, slug: string): Promise<PublicPost | null> {
   const { data } = await supabasePublic()
     .from("posts")
-    .select("id, client_id, slug, title, excerpt, body, cover_image_url, tag, target_keyword, published_at, created_at")
+    .select("id, client_id, slug, title, excerpt, body, cover_image_url, tag, target_keyword, published_at, created_at, updated_at")
     .eq("client_id", clientId)
     .eq("slug", slug)
     .eq("status", "published")

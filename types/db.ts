@@ -1,5 +1,5 @@
 // Generated types for the public read surface in Supabase.
-// Mirror of the views shipped in the Phase 1 / Half A migration + Phase 2 site_copy.
+// Phase 1 (public views) + Phase 2 (site_copy, client_areas, NAP fields).
 
 export type PublicClientProfile = {
   client_id: string;
@@ -16,6 +16,12 @@ export type PublicClientProfile = {
   brokerage_story: string | null;
   differentiators: string | null;
   property_types: string[];
+  // Phase 2 NAP fields (requires public_client_profile view to be updated)
+  phone_e164: string | null;
+  street_address: string | null;
+  city: string | null;
+  state: string | null;
+  postal_code: string | null;
 };
 
 export type PublicClientSite = {
@@ -24,7 +30,6 @@ export type PublicClientSite = {
   custom_domain: string | null;
   ssl_status: "pending" | "active" | "failed" | null;
   provisioned_at: string | null;
-  // Added Phase 2 — AI-resolved display name for the agent
   agent_display_name: string | null;
 };
 
@@ -49,17 +54,33 @@ export type PublicPost = {
   target_keyword: string | null;
   published_at: string | null;
   created_at: string;
+  updated_at?: string | null;
 };
 
-// Phase 2 — AI-generated copy exposed via public_site_copy view.
-// View is gated by dns_verified = true, same pattern as other public_* views.
-// Internal fields (stale, ai_model, updated_at) are not exposed by the view.
+// Phase 2: AI-generated copy exposed via public_site_copy view.
 export type SiteCopy = {
   client_id: string;
   tagline: string | null;
   bio_short: string | null;
   bio_long: string | null;
+  ideal_client_blurb: string | null;
   area_blurb: string | null;
   meta_title: string | null;
   meta_description: string | null;
+  og_image_url: string | null;
+};
+
+// Phase 2: Per-area landing pages exposed via public_client_areas view.
+export type PublicClientArea = {
+  client_id: string;
+  slug: string;
+  area_type: "city" | "neighborhood" | "county";
+  name: string;
+  state: string | null;
+  intro: string;
+  market_blurb: string;
+  faqs: Array<{ q: string; a: string }>;
+  meta_title: string;
+  meta_description: string;
+  updated_at: string | null;
 };
