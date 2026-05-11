@@ -4,6 +4,8 @@ import Link from "next/link";
 import { resolveHost } from "@/lib/resolve-host";
 import { getProfile, getMarket, listPosts } from "@/lib/queries";
 
+export const runtime = 'edge';
+
 export default async function HomePage() {
   const host = headers().get("x-resolved-host");
   const resolved = await resolveHost(host);
