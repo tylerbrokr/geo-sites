@@ -15,7 +15,7 @@ const PARENT = (process.env.NEXT_PUBLIC_SITES_PARENT_DOMAIN || "sites.geoemploye
  */
 export function middleware(req: NextRequest) {
   const url = req.nextUrl;
-  const host = (req.headers.get("host") || "").split(":")[0].toLowerCase();
+  const host = (req.headers.get("x-forwarded-host") || req.headers.get("host") || "").split(":")[0].toLowerCase();
 
   // Skip Next internals + the revalidate webhook.
   if (
