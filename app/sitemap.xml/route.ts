@@ -28,6 +28,7 @@ export async function GET() {
   const allUrls: SitemapUrl[] = [
     { loc: "/", changefreq: "weekly", priority: "1.0" },
     { loc: "/about", changefreq: "monthly", priority: "0.8" },
+    { loc: "/blog", changefreq: "weekly", priority: "0.9" },
     ...areas.map((a) => ({
       loc: "/areas/" + a.slug,
       lastmod: a.updated_at ? a.updated_at.slice(0, 10) : undefined,

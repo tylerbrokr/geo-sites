@@ -1,10 +1,12 @@
 import "@/styles/globals.css";
 import type { Metadata } from "next";
+import type { CSSProperties, ReactNode } from "react";
 import { headers } from "next/headers";
 import { resolveHost } from "@/lib/resolve-host";
-import { getProfile, getSiteCopy } from "@/lib/queries";
-import type { CSSProperties, ReactNode } from "react";
+import { getProfile, getSiteCopy, listAreas, listPosts } from "@/lib/queries";
 import { readableForeground } from "@/lib/utils";
+import SiteHeader from "@/app/components/SiteHeader";
+import SiteFooter from "@/app/components/SiteFooter";
 
 export const runtime = "edge";
 export const revalidate = 3600;
@@ -30,10 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: copy?.meta_title || siteName, template: `%s · ${siteName}` },
     description: copy?.meta_description || copy?.tagline || undefined,
-    openGraph: {
-      siteName,
-      images: ogImage ? [ogImage] : undefined,
-    },
+    openGraph: { siteName, images: ogImage ? [ogImage] : undefined },
     twitter: { card: "summary_large_image" },
   };
 }
@@ -46,8 +45,16 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   let brandAccent = "#c9a96e";
   let brandOnPrimary = "#fff";
 
+  let profile = null;
+  let areas: Awaited<ReturnType<typeof listAreas>> = [];
+  let recentPosts: Awaited<ReturnType<typeof listPosts>> = [];
+
   if (resolved) {
-    const profile = await getProfile(resolved.clientId);
+    [profile, areas, recentPosts] = await Promise.all([
+      getProfile(resolved.clientId),
+      listAreas(resolved.clientId),
+      listPosts(resolved.clientId, 5),
+    ]);
     if (profile?.primary_color) {
       brandPrimary = profile.primary_color;
       brandOnPrimary = readableForeground(profile.primary_color);
@@ -66,7 +73,20 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         } as CSSProperties
       }
     >
-      <body className="font-sans bg-canvas text-ink">{children}</body>
+      <body className="font-sans bg-canvas text-ink flex flex-col min-h-screen">
+        {resolved && (
+          <SiteHeader site={resolved.site} profile={profile} />
+        )}
+        <div className="flex-1">{children}</div>
+        {resolved && (
+          <SiteFooter
+            site={resolved.site}
+            profile={profile}
+            areas={areas}
+            recentPosts={recentPosts}
+          />
+        )}
+      </body>
     </html>
   );
 }
