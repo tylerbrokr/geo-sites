@@ -6,4 +6,4 @@ pages_build_output_dir = ".vercel/output/static"
 [vars]
 NEXT_PUBLIC_SUPABASE_URL = "https://gfxdpbitanyuaowhiwzc.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmeGRwYml0YW55dWFvd2hpd3pjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNzQyNzQsImV4cCI6MjA5Mzk1MDI3NH0.tDc_27_y2oplcA9xXsuHy8IeisdsO14W22C3NcSkn_4"
-NEXT_PUBLIC_SITES_PARENT_DOMAIN = "sites.geoemployee.com"
+NEXT_PUBLIC_SITES_PARENT_DOMAIN = "mygeosite.com"
