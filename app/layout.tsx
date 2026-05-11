@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { resolveHost } from "@/lib/resolve-host";
 import { getProfile, getSiteCopy } from "@/lib/queries";
+import type { CSSProperties, ReactNode } from "react";
 import { readableForeground } from "@/lib/utils";
 
 export const runtime = "edge";
@@ -37,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   const host = (await headers()).get("x-resolved-host");
   const resolved = await resolveHost(host);
 
@@ -62,7 +63,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           "--brand-primary": brandPrimary,
           "--brand-accent": brandAccent,
           "--brand-on-primary": brandOnPrimary,
-        } as React.CSSProperties
+        } as CSSProperties
       }
     >
       <body className="font-sans bg-canvas text-ink">{children}</body>
