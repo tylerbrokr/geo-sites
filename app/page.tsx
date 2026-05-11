@@ -7,7 +7,7 @@ import { getProfile, getMarket, listPosts } from "@/lib/queries";
 export const runtime = 'edge';
 
 export default async function HomePage() {
-  const host = headers().get("x-resolved-host");
+  const host = (await headers()).get("x-resolved-host");
   const resolved = await resolveHost(host);
   if (!resolved) notFound();
 
