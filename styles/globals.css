@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light only;
+}
+
+html, body {
+  background: hsl(0 0% 100%);
+  color: hsl(0 0% 10%);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hairline rule used throughout the brand. */
+.hairline { border-color: hsl(0 0% 10% / 0.08); }
+
+/* Hover = opacity shift only. No transforms, no shadows. */
+a, button { transition: opacity 150ms ease; }
+a:hover, button:hover { opacity: 0.7; }

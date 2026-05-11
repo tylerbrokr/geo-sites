@@ -1,0 +1,9 @@
+name = "geo-sites"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[vars]
+# Runtime vars — override these in the Cloudflare Pages dashboard.
+# NEXT_PUBLIC_* vars are baked in at build time; set them in Pages build env.
+# REVALIDATE_SECRET is runtime-only — set it in Pages > Settings > Variables.
