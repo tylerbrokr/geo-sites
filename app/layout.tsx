@@ -8,7 +8,7 @@ export const runtime = 'edge';
 export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const host = headers().get("x-resolved-host");
+  const host = (await headers()).get("x-resolved-host");
   const resolved = await resolveHost(host);
   if (!resolved) return { title: "Site not found" };
 
