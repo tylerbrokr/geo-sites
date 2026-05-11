@@ -21,13 +21,12 @@ export async function getMarket(clientId: string): Promise<PublicClientMarket | 
   return data ?? null;
 }
 
-// Phase 2: reads the AI-generated copy for the site.
-// The generate-site-copy edge function populates this row on provision
-// and refreshes it whenever intake data changes.
+// Phase 2: reads the AI-generated copy for the site via the public_site_copy view.
+// Gated by dns_verified = true (same pattern as other public_* views).
 export async function getSiteCopy(clientId: string): Promise<SiteCopy | null> {
   const { data } = await supabasePublic()
-    .from("site_copy")
-    .select("client_id, tagline, bio_short, bio_long, area_blurb, meta_title, meta_description, stale, ai_model, updated_at")
+    .from("public_site_copy")
+    .select("client_id, tagline, bio_short, bio_long, area_blurb, meta_title, meta_description")
     .eq("client_id", clientId)
     .maybeSingle<SiteCopy>();
   return data ?? null;

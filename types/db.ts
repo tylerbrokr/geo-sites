@@ -51,8 +51,9 @@ export type PublicPost = {
   created_at: string;
 };
 
-// Phase 2 — AI-generated copy for each site.
-// Populated by the generate-site-copy edge function; refreshed by cron every 2 min.
+// Phase 2 — AI-generated copy exposed via public_site_copy view.
+// View is gated by dns_verified = true, same pattern as other public_* views.
+// Internal fields (stale, ai_model, updated_at) are not exposed by the view.
 export type SiteCopy = {
   client_id: string;
   tagline: string | null;
@@ -61,7 +62,4 @@ export type SiteCopy = {
   area_blurb: string | null;
   meta_title: string | null;
   meta_description: string | null;
-  stale: boolean;
-  ai_model: string | null;
-  updated_at: string | null;
 };
