@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getPost, getProfile } from "@/lib/queries";
 
+export const runtime = 'edge';
+
 type Props = { params: { slug: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -38,7 +40,6 @@ export default async function PostPage({ params }: Props) {
   ]);
   if (!post) notFound();
 
-  // JSON-LD Article schema for GEO discoverability.
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
