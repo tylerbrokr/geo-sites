@@ -6,13 +6,14 @@ import { getPost, getProfile } from "@/lib/queries";
 
 export const runtime = 'edge';
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const host = headers().get("x-resolved-host");
+  const { slug } = await params;
+  const host = (await headers()).get("x-resolved-host");
   const resolved = await resolveHost(host);
   if (!resolved) return {};
-  const post = await getPost(resolved.clientId, params.slug);
+  const post = await getPost(resolved.clientId, slug);
   if (!post) return {};
 
   const canonical = `https://${canonicalHost(resolved.site)}/blog/${post.slug}`;
@@ -30,12 +31,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PostPage({ params }: Props) {
-  const host = headers().get("x-resolved-host");
+  const { slug } = await params;
+  const host = (await headers()).get("x-resolved-host");
   const resolved = await resolveHost(host);
   if (!resolved) notFound();
 
   const [post, profile] = await Promise.all([
-    getPost(resolved.clientId, params.slug),
+    getPost(resolved.clientId, slug),
     getProfile(resolved.clientId),
   ]);
   if (!post) notFound();
