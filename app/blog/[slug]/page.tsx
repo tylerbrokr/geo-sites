@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getPost, getProfile } from "@/lib/queries";
 
-export const runtime = 'edge';
+export const runtime = "edge";
 
+// Next.js 15: params is a Promise — must be awaited in both functions.
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -42,6 +43,13 @@ export default async function PostPage({ params }: Props) {
   ]);
   if (!post) notFound();
 
+  // JSON-LD Article schema for GEO discoverability.
+  // Use agent_display_name (from client_sites, AI-resolved) for the author field.
+  const agentName = resolved.site.agent_display_name
+    || profile?.business_name
+    || profile?.brokerage
+    || "Author";
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -51,7 +59,7 @@ export default async function PostPage({ params }: Props) {
     datePublished: post.published_at,
     author: {
       "@type": "Person",
-      name: profile?.business_name || profile?.brokerage || "Author",
+      name: agentName,
     },
   };
 

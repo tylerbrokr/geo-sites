@@ -2,21 +2,33 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { resolveHost } from "@/lib/resolve-host";
-import { getProfile } from "@/lib/queries";
+import { getProfile, getSiteCopy } from "@/lib/queries";
 
-export const runtime = 'edge';
-export const revalidate = 3600;
+export const runtime = "edge";
+export const revalidate = 3600; // hourly background ISR; on-demand via /api/revalidate
 
 export async function generateMetadata(): Promise<Metadata> {
   const host = (await headers()).get("x-resolved-host");
   const resolved = await resolveHost(host);
   if (!resolved) return { title: "Site not found" };
 
-  const profile = await getProfile(resolved.clientId);
-  const name = profile?.business_name || profile?.brokerage || "Real estate";
+  // Prefer AI-generated copy; fall back to raw profile fields.
+  const [profile, copy] = await Promise.all([
+    getProfile(resolved.clientId),
+    getSiteCopy(resolved.clientId),
+  ]);
+
+  const siteName = resolved.site.agent_display_name
+    || profile?.business_name
+    || profile?.brokerage
+    || "Real estate";
+
+  const metaTitle = copy?.meta_title || siteName;
+  const metaDescription = copy?.meta_description || profile?.ideal_client || undefined;
+
   return {
-    title: { default: name, template: `%s. ${name}` },
-    description: profile?.ideal_client || undefined,
+    title: { default: metaTitle, template: `%s · ${siteName}` },
+    description: metaDescription,
   };
 }
 

@@ -1,5 +1,5 @@
 import { supabasePublic } from "./supabase";
-import type { PublicClientProfile, PublicClientMarket, PublicPost } from "@/types/db";
+import type { PublicClientProfile, PublicClientMarket, PublicPost, SiteCopy } from "@/types/db";
 
 // All reads scoped by client_id at the application layer.
 
@@ -18,6 +18,18 @@ export async function getMarket(clientId: string): Promise<PublicClientMarket | 
     .select("*")
     .eq("client_id", clientId)
     .maybeSingle<PublicClientMarket>();
+  return data ?? null;
+}
+
+// Phase 2: reads the AI-generated copy for the site.
+// The generate-site-copy edge function populates this row on provision
+// and refreshes it whenever intake data changes.
+export async function getSiteCopy(clientId: string): Promise<SiteCopy | null> {
+  const { data } = await supabasePublic()
+    .from("site_copy")
+    .select("client_id, tagline, bio_short, bio_long, area_blurb, meta_title, meta_description, stale, ai_model, updated_at")
+    .eq("client_id", clientId)
+    .maybeSingle<SiteCopy>();
   return data ?? null;
 }
 
