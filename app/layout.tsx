@@ -4,7 +4,8 @@ import { headers } from "next/headers";
 import { resolveHost } from "@/lib/resolve-host";
 import { getProfile } from "@/lib/queries";
 
-export const revalidate = 3600; // hourly background ISR; on-demand via /api/revalidate
+export const runtime = 'edge';
+export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const host = headers().get("x-resolved-host");
