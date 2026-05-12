@@ -43,3 +43,41 @@ export function linkAreasInHtml(
   }
   return result;
 }
+
+/**
+ * Strip markdown syntax and return plain text.
+ * Used to populate JSON-LD articleBody so LLMs get a clean extraction target.
+ */
+export function stripMarkdown(md: string): string {
+  return md
+    .replace(/^#{1,6}\s+/gm, "")         // headings
+    .replace(/\*\*(.+?)\*\*/g, "$1")     // bold
+    .replace(/\*(.+?)\*/g, "$1")         // italic
+    .replace(/\[(.+?)\]\(.+?\)/g, "$1")  // links
+    .replace(/`(.+?)`/g, "$1")           // inline code
+    .replace(/^>\s+/gm, "")              // blockquotes
+    .replace(/^[-*+]\s+/gm, "")          // unordered list markers
+    .replace(/^\d+\.\s+/gm, "")          // ordered list markers
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/**
+ * Auto-link the first occurrence of each area name in a markdown body string.
+ * Injects a markdown link [Area Name](/areas/slug) so it renders correctly
+ * inside react-markdown (unlike the HTML version which would show raw <a> tags).
+ * Skips occurrences already inside a markdown link [...](...).
+ */
+export function linkAreasInMarkdown(
+  markdown: string,
+  areas: Array<{ name: string; slug: string }>
+): string {
+  let result = markdown;
+  for (const area of areas) {
+    const escaped = area.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // Negative lookbehind: skip if already inside a markdown link bracket
+    const pattern = new RegExp(`(?<!\\[)\\b(${escaped})\\b(?![^\\[]*\\])`, "i");
+    result = result.replace(pattern, `[$1](/areas/${area.slug})`);
+  }
+  return result;
+}

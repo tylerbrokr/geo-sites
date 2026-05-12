@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getPost, getProfile, getSiteCopy, listAreas } from "@/lib/queries";
-import { linkAreasInHtml } from "@/lib/utils";
+import { stripMarkdown, linkAreasInMarkdown } from "@/lib/utils";
+import { PostBody } from "@/app/components/PostBody";
 
 export const runtime = "edge";
 
@@ -64,6 +65,12 @@ export default async function PostPage({ params }: Props) {
     "Author";
   const hostname = canonicalHost(resolved.site);
 
+  // Auto-link first occurrence of each area name in the markdown body
+  const linkedMarkdown = linkAreasInMarkdown(post.body ?? "", areas);
+
+  // Plain text version for JSON-LD articleBody
+  const plainBody = stripMarkdown(post.body ?? "");
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -74,6 +81,8 @@ export default async function PostPage({ params }: Props) {
         image: post.cover_image_url || undefined,
         datePublished: post.published_at,
         dateModified: post.updated_at || post.published_at,
+        articleBody: plainBody || undefined,
+        wordCount: plainBody ? plainBody.split(/\s+/).length : undefined,
         author: { "@type": "Person", name: agentName },
         publisher: {
           "@type": "Organization",
@@ -85,15 +94,12 @@ export default async function PostPage({ params }: Props) {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: "https://" + hostname + "/" },
-          { "@type": "ListItem", position: 2, name: "Blog", item: "https://" + hostname + "/" },
+          { "@type": "ListItem", position: 2, name: "Blog", item: "https://" + hostname + "/blog" },
           { "@type": "ListItem", position: 3, name: post.title, item: "https://" + hostname + "/blog/" + post.slug },
         ],
       },
     ],
   };
-
-  // Auto-link first occurrence of each area name in the post body
-  const linkedBody = linkAreasInHtml(post.body, areas, hostname);
 
   return (
     <main className="mx-auto max-w-[720px] px-6 py-16">
@@ -105,7 +111,7 @@ export default async function PostPage({ params }: Props) {
       <nav className="text-xs text-ink-60 mb-8">
         <a href="/" className="hover:text-ink transition-colors">Home</a>
         <span className="mx-2">·</span>
-        <span>Blog</span>
+        <a href="/blog" className="hover:text-ink transition-colors">Blog</a>
       </nav>
 
       <p className="text-xs uppercase tracking-[0.2em] text-ink-60 mb-4">
@@ -121,10 +127,7 @@ export default async function PostPage({ params }: Props) {
       {post.cover_image_url && (
         <img src={post.cover_image_url} alt="" className="w-full mb-10 border hairline" />
       )}
-      <article
-        className="prose-content font-sans text-lg leading-[1.7]"
-        dangerouslySetInnerHTML={{ __html: linkedBody }}
-      />
+      <PostBody markdown={linkedMarkdown} />
     </main>
   );
 }
