@@ -46,6 +46,7 @@ export default async function AboutPage() {
   const agentName =
     resolved.site.agent_display_name || profile.business_name || profile.brokerage;
   const hostname = canonicalHost(resolved.site);
+  const location = [profile.city, profile.state].filter(Boolean).join(", ");
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -104,8 +105,16 @@ export default async function AboutPage() {
           />
         )}
         <div>
+          {/* Eyebrow — accent color */}
+          {location && (
+            <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--brand-accent)] mb-2">
+              {location}
+            </p>
+          )}
           <h1 className="font-display text-4xl md:text-5xl leading-[1.1]">{agentName}</h1>
-          {profile.brokerage && <p className="mt-2 text-lg text-ink-60">{profile.brokerage}</p>}
+          {/* Decorative rule: 2px, 24px wide */}
+          <div className="mt-3 mb-3 h-[2px] w-6 bg-[var(--brand-accent)]" />
+          {profile.brokerage && <p className="text-lg text-ink-60">{profile.brokerage}</p>}
           {profile.years_experience && (
             <p className="mt-1 text-sm text-ink-60">{profile.years_experience} years in real estate</p>
           )}

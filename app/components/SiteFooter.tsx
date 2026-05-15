@@ -15,7 +15,10 @@ export default function SiteFooter({ site, profile, areas, recentPosts }: Props)
   const footerAreas = areas.slice(0, 12);
 
   return (
-    <footer className="border-t hairline mt-16 bg-canvas">
+    <footer className="mt-16 bg-canvas relative">
+      {/* 1px accent top border at 20% opacity */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-[var(--brand-accent)] opacity-20" />
+
       <div className="mx-auto max-w-[1100px] px-6 py-12">
         {/* Three columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">

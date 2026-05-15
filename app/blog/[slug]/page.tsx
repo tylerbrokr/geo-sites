@@ -64,11 +64,9 @@ export default async function PostPage({ params }: Props) {
     profile?.brokerage ||
     "Author";
   const hostname = canonicalHost(resolved.site);
+  const postTag = (post as any).tag as string | null | undefined;
 
-  // Auto-link first occurrence of each area name in the markdown body
   const linkedMarkdown = linkAreasInMarkdown(post.body ?? "", areas);
-
-  // Plain text version for JSON-LD articleBody
   const plainBody = stripMarkdown(post.body ?? "");
 
   const jsonLd = {
@@ -114,6 +112,13 @@ export default async function PostPage({ params }: Props) {
         <a href="/blog" className="hover:text-ink transition-colors">Blog</a>
       </nav>
 
+      {/* Tag eyebrow — accent color */}
+      {postTag && (
+        <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--brand-accent)] mb-3">
+          {postTag}
+        </p>
+      )}
+
       <p className="text-xs uppercase tracking-[0.2em] text-ink-60 mb-4">
         {post.published_at
           ? new Date(post.published_at).toLocaleDateString("en-US", {
@@ -123,7 +128,11 @@ export default async function PostPage({ params }: Props) {
             })
           : ""}
       </p>
-      <h1 className="font-display text-4xl md:text-5xl leading-[1.1] mb-8">{post.title}</h1>
+
+      <h1 className="font-display text-4xl md:text-5xl leading-[1.1]">{post.title}</h1>
+      {/* Decorative rule: 2px, 32px wide, 12px below title */}
+      <div className="mt-3 mb-8 h-[2px] w-8 bg-[var(--brand-accent)]" />
+
       {post.cover_image_url && (
         <img src={post.cover_image_url} alt="" className="w-full mb-10 border hairline" />
       )}

@@ -25,7 +25,6 @@ export default async function HomePage() {
   const hostname = canonicalHost(resolved.site);
   const location = [market?.primary_city, market?.primary_state].filter(Boolean).join(", ");
 
-  // JSON-LD: RealEstateAgent + LocalBusiness
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -67,12 +66,17 @@ export default async function HomePage() {
 
       {/* Hero header */}
       <header className="border-b hairline pb-12 mb-12">
+        {/* Eyebrow — accent color */}
         {location && (
-          <p className="text-xs uppercase tracking-[0.2em] text-ink-60 mb-4">{location}</p>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--brand-accent)] mb-4">
+            {location}
+          </p>
         )}
         <h1 className="font-display text-5xl md:text-7xl leading-[1.05]">{agentName}</h1>
+        {/* Decorative rule: 2px, 24px wide, accent color */}
+        <div className="mt-3 mb-3 h-[2px] w-6 bg-[var(--brand-accent)]" />
         {profile.brokerage && (
-          <p className="mt-3 text-xl text-ink-60">{profile.brokerage}</p>
+          <p className="text-xl text-ink-60">{profile.brokerage}</p>
         )}
         {copy?.tagline && (
           <p className="mt-6 text-lg text-ink-80 max-w-2xl">{copy.tagline}</p>
@@ -117,7 +121,7 @@ export default async function HomePage() {
           <ul className="divide-y divide-ink-08">
             {posts.map((p) => (
               <li key={p.id} className="py-6">
-                <Link href={`/blog/${p.slug}`} className="block">
+                <Link href={`/blog/${p.slug}`} className="block group">
                   <p className="text-xs uppercase tracking-[0.2em] text-ink-60 mb-2">
                     {p.published_at
                       ? new Date(p.published_at).toLocaleDateString("en-US", {
@@ -126,9 +130,16 @@ export default async function HomePage() {
                           day: "numeric",
                         })
                       : ""}
+                    {(p as any).tag && (
+                      <span className="ml-3 text-[var(--brand-accent)]">{(p as any).tag}</span>
+                    )}
                   </p>
                   <h3 className="font-display text-2xl">{p.title}</h3>
                   {p.excerpt && <p className="mt-2 text-ink-60">{p.excerpt}</p>}
+                  {/* Read → arrow, accent on hover */}
+                  <span className="inline-block mt-3 text-xs text-ink-40 group-hover:text-[var(--brand-accent)] transition-colors">
+                    Read →
+                  </span>
                 </Link>
               </li>
             ))}

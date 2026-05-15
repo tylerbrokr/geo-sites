@@ -43,7 +43,6 @@ export default async function AreaPage({ params }: Props) {
   const hostname = canonicalHost(resolved.site);
   const areaLabel = area.name + (area.state ? ", " + area.state : "");
 
-  // Filter posts loosely matching this area by title
   const areaPosts = recentPosts
     .filter((p) => p.title.toLowerCase().includes(area.name.toLowerCase()))
     .slice(0, 3);
@@ -92,8 +91,11 @@ export default async function AreaPage({ params }: Props) {
         <span>{area.name}</span>
       </nav>
 
+      {/* Eyebrow — agent name in accent */}
       {agentName && (
-        <p className="text-xs uppercase tracking-[0.2em] text-ink-60 mb-3">{agentName}</p>
+        <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--brand-accent)] mb-3">
+          {agentName}
+        </p>
       )}
       <h1 className="font-display text-4xl md:text-5xl leading-[1.1] mb-6">
         {area.name} Real Estate
@@ -113,10 +115,12 @@ export default async function AreaPage({ params }: Props) {
 
       {area.faqs.length > 0 && (
         <section className="mb-12">
+          {/* Section eyebrow — accent */}
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--brand-accent)] mb-2">FAQ</p>
           <h2 className="font-display text-2xl mb-6">Frequently asked questions</h2>
           <div className="divide-y divide-ink-08">
             {area.faqs.map((faq, i) => (
-              <details key={i} className="py-4 group">
+              <details key={i} className="py-4 group open:border-l-2 open:border-[var(--brand-accent)] open:pl-4 transition-all">
                 <summary className="cursor-pointer font-semibold text-base list-none flex justify-between items-center">
                   {faq.q}
                   <span className="ml-4 text-ink-40 group-open:rotate-180 transition-transform">↓</span>
@@ -130,13 +134,18 @@ export default async function AreaPage({ params }: Props) {
 
       {areaPosts.length > 0 && (
         <section className="mb-12">
+          {/* Section eyebrow — accent */}
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--brand-accent)] mb-2">Related</p>
           <h2 className="font-display text-2xl mb-6">Related posts</h2>
           <ul className="divide-y divide-ink-08">
             {areaPosts.map((p) => (
               <li key={p.id} className="py-4">
-                <Link href={"/blog/" + p.slug} className="block hover:text-[var(--brand-primary)] transition-colors">
+                <Link href={"/blog/" + p.slug} className="block group hover:text-[var(--brand-primary)] transition-colors">
                   <h3 className="font-display text-xl">{p.title}</h3>
                   {p.excerpt && <p className="mt-1 text-sm text-ink-60">{p.excerpt}</p>}
+                  <span className="inline-block mt-2 text-xs text-ink-40 group-hover:text-[var(--brand-accent)] transition-colors">
+                    Read →
+                  </span>
                 </Link>
               </li>
             ))}

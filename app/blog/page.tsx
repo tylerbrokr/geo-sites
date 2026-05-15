@@ -132,6 +132,10 @@ export default async function BlogIndexPage({ searchParams }: Props) {
                 {p.excerpt && (
                   <p className="mt-2 text-ink-60 leading-relaxed">{p.excerpt}</p>
                 )}
+                {/* Read → arrow, accent on hover */}
+                <span className="inline-block mt-3 text-xs text-ink-40 group-hover:text-[var(--brand-accent)] transition-colors">
+                  Read →
+                </span>
               </Link>
             </li>
           ))}

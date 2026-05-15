@@ -11,7 +11,7 @@ export default function SiteHeader({ site, profile }: Props) {
   const agentName = site.agent_display_name || profile?.business_name || profile?.brokerage || "";
 
   return (
-    <header className="sticky top-0 z-40 bg-canvas border-b hairline">
+    <header className="sticky top-0 z-40 bg-canvas relative">
       <div className="mx-auto max-w-[1100px] px-6 py-4 flex items-center justify-between gap-6">
         {/* Left: name + brokerage */}
         <div className="min-w-0">
@@ -42,12 +42,15 @@ export default function SiteHeader({ site, profile }: Props) {
       </div>
 
       {/* Mobile nav row */}
-      <div className="sm:hidden border-t hairline">
+      <div className="sm:hidden">
         <div className="mx-auto max-w-[1100px] px-6 py-2 flex gap-5 text-sm text-ink-60">
           <Link href="/about" className="hover:text-ink transition-colors">About</Link>
           <Link href="/blog" className="hover:text-ink transition-colors">Blog</Link>
         </div>
       </div>
+
+      {/* 1px accent bottom border at 20% opacity */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--brand-accent)] opacity-20" />
     </header>
   );
 }
