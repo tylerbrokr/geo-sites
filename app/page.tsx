@@ -1,11 +1,38 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getProfile, getMarket, listPosts, getSiteCopy, listAreas } from "@/lib/queries";
 import { formatPhoneUs } from "@/lib/utils";
 
 export const runtime = "edge";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const host = (await headers()).get("x-resolved-host");
+  const resolved = await resolveHost(host);
+  if (!resolved) return {};
+  const [copy, profile] = await Promise.all([
+    getSiteCopy(resolved.clientId),
+    getProfile(resolved.clientId),
+  ]);
+  const hostname = canonicalHost(resolved.site);
+  const canonical = "https://" + hostname + "/";
+  const ogImage = copy?.og_image_url || profile?.headshot_url || profile?.logo_url || undefined;
+  return {
+    title: copy?.meta_title || resolved.site.agent_display_name || undefined,
+    description: copy?.meta_description || undefined,
+    alternates: { canonical },
+    openGraph: {
+      title: copy?.meta_title || resolved.site.agent_display_name || undefined,
+      description: copy?.meta_description || undefined,
+      type: "website",
+      url: canonical,
+      images: ogImage ? [ogImage] : undefined,
+    },
+    twitter: { card: "summary_large_image" },
+  };
+}
 
 export default async function HomePage() {
   const host = (await headers()).get("x-resolved-host");

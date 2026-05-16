@@ -27,7 +27,14 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "About " + agentName,
     description: copy?.bio_short || undefined,
     alternates: { canonical },
-    openGraph: { title: "About " + agentName, url: canonical, images: ogImage ? [ogImage] : undefined },
+    openGraph: {
+      title: "About " + agentName,
+      description: copy?.bio_short || copy?.meta_description || undefined,
+      type: "website",
+      url: canonical,
+      images: ogImage ? [ogImage] : undefined,
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 
