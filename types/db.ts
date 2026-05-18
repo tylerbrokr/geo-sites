@@ -31,6 +31,8 @@ export type PublicClientSite = {
   ssl_status: "pending" | "active" | "failed" | null;
   provisioned_at: string | null;
   agent_display_name: string | null;
+  // Added when Lovable migration adds indexnow_key to client_sites + public_client_site view
+  indexnow_key: string | null;
 };
 
 export type PublicClientMarket = {
