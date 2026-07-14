@@ -35,7 +35,9 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl, 301);
   }
 
-  const res = NextResponse.next();
+   const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-resolved-host", host);
+  const res = NextResponse.next({ request: { headers: requestHeaders } });
   res.headers.set("x-resolved-host", host);
   return res;
 }
