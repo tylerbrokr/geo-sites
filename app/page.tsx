@@ -5,6 +5,7 @@ import Link from "next/link";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getProfile, getMarket, listPosts, getSiteCopy, listAreas } from "@/lib/queries";
 import { formatPhoneUs } from "@/lib/utils";
+import { agentEntitySchema } from "@/lib/entity";
 
 export const runtime = "edge";
 
@@ -63,14 +64,13 @@ export default async function HomePage() {
         logo: profile.logo_url || undefined,
         telephone: profile.phone_e164 || undefined,
         url: `https://${hostname}/`,
-        address: (profile.street_address || profile.city || profile.state) ? {
+        address: (profile.city || profile.state) ? {
           "@type": "PostalAddress",
-          streetAddress: profile.street_address || undefined,
           addressLocality: profile.city || undefined,
           addressRegion: profile.state || undefined,
-          postalCode: profile.postal_code || undefined,
           addressCountry: "US",
         } : undefined,
+        ...agentEntitySchema(profile),
         areaServed: areas.map((a) => ({
           "@type": "Place",
           name: `${a.name}${a.state ? `, ${a.state}` : ""}`,
@@ -179,12 +179,11 @@ export default async function HomePage() {
         <address className="not-italic text-sm leading-relaxed text-ink-60">
           <div className="font-semibold text-ink">{agentName}</div>
           {profile.brokerage && <div>{profile.brokerage}</div>}
-          {profile.street_address && <div>{profile.street_address}</div>}
-          {(profile.city || profile.state || profile.postal_code) && (
+          {(profile.city || profile.state) && (
             <div>
               {profile.city}
               {profile.city && profile.state ? ", " : ""}
-              {profile.state} {profile.postal_code}
+              {profile.state}
             </div>
           )}
           {profile.phone_e164 && (

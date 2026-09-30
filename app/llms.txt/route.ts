@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getProfile, getSiteCopy, listAreas, listPosts } from "@/lib/queries";
 import { formatPhoneUs } from "@/lib/utils";
+import { profileLinks } from "@/lib/entity";
 
 export const runtime = "edge";
 
@@ -50,17 +51,21 @@ export async function GET() {
   }
 
   // NAP block
-  const hasNap = profile?.phone_e164 || profile?.street_address || profile?.city;
+  const hasNap = profile?.phone_e164 || profile?.city;
   if (hasNap) {
     lines.push("## Contact");
     if (profile?.phone_e164) lines.push(`- Phone: ${formatPhoneUs(profile.phone_e164)}`);
-    const addressParts = [
-      profile?.street_address,
-      profile?.city,
-      profile?.state,
-      profile?.postal_code,
-    ].filter(Boolean);
-    if (addressParts.length > 0) lines.push(`- Address: ${addressParts.join(", ")}`);
+    const locationParts = [profile?.city, profile?.state].filter(Boolean);
+    if (locationParts.length > 0) lines.push(`- Location: ${locationParts.join(", ")}`);
+    lines.push("");
+  }
+
+  const links = profileLinks(profile);
+  const license = profile?.license_number?.trim();
+  if (license || links.length > 0) {
+    lines.push("## Credentials and profiles");
+    if (license) lines.push(`- Real estate license: ${license}`);
+    for (const l of links) lines.push(`- [${l.label}](${l.url})`);
     lines.push("");
   }
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { PublicClientSite, PublicClientProfile, PublicClientArea, PublicPost } from "@/types/db";
 import { formatPhoneUs } from "@/lib/utils";
+import { profileLinks } from "@/lib/entity";
 
 type Props = {
   site: PublicClientSite;
@@ -13,6 +14,7 @@ export default function SiteFooter({ site, profile, areas, recentPosts }: Props)
   const agentName = site.agent_display_name || profile?.business_name || profile?.brokerage || "";
   const year = new Date().getFullYear();
   const footerAreas = areas.slice(0, 12);
+  const links = profileLinks(profile);
 
   return (
     <footer className="mt-16 bg-canvas relative">
@@ -28,12 +30,11 @@ export default function SiteFooter({ site, profile, areas, recentPosts }: Props)
             <address className="not-italic text-sm leading-relaxed text-ink-60">
               <div className="font-semibold text-ink mb-1">{agentName}</div>
               {profile?.brokerage && <div>{profile.brokerage}</div>}
-              {profile?.street_address && <div>{profile.street_address}</div>}
-              {(profile?.city || profile?.state || profile?.postal_code) && (
+              {(profile?.city || profile?.state) && (
                 <div>
                   {profile.city}
                   {profile.city && profile.state ? ", " : ""}
-                  {profile.state} {profile.postal_code}
+                  {profile.state}
                 </div>
               )}
               {profile?.phone_e164 && (
@@ -47,6 +48,22 @@ export default function SiteFooter({ site, profile, areas, recentPosts }: Props)
                 </div>
               )}
             </address>
+            {links.length > 0 && (
+              <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-60">
+                {links.map((l) => (
+                  <li key={l.url}>
+                    <a
+                      href={l.url}
+                      target="_blank"
+                      rel="noopener"
+                      className="hover:text-[var(--brand-primary)] transition-colors"
+                    >
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Col 2: Areas served */}

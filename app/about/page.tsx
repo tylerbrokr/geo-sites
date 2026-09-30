@@ -5,6 +5,7 @@ import Link from "next/link";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getProfile, getSiteCopy, listAreas } from "@/lib/queries";
 import { formatPhoneUs } from "@/lib/utils";
+import { agentEntitySchema, profileLinks } from "@/lib/entity";
 
 export const runtime = "edge";
 
@@ -67,16 +68,15 @@ export default async function AboutPage() {
         telephone: profile.phone_e164 || undefined,
         url: "https://" + hostname + "/",
         address:
-          profile.street_address || profile.city || profile.state
+          profile.city || profile.state
             ? {
                 "@type": "PostalAddress",
-                streetAddress: profile.street_address || undefined,
                 addressLocality: profile.city || undefined,
                 addressRegion: profile.state || undefined,
-                postalCode: profile.postal_code || undefined,
                 addressCountry: "US",
               }
             : undefined,
+        ...agentEntitySchema(profile),
         areaServed: areas.map((a) => ({
           "@type": "Place",
           name: a.name + (a.state ? ", " + a.state : ""),
@@ -89,6 +89,8 @@ export default async function AboutPage() {
   };
 
   const bioParagraphs = copy?.bio_long?.split(/\n\n+/) ?? [];
+  const links = profileLinks(profile);
+  const license = profile.license_number?.trim();
 
   return (
     <main className="mx-auto max-w-[720px] px-6 py-16">
@@ -154,16 +156,41 @@ export default async function AboutPage() {
         </section>
       )}
 
+      {(license || links.length > 0) && (
+        <section className="mb-12">
+          <h2 className="font-display text-2xl mb-4">Credentials and profiles</h2>
+          {license && (
+            <p className="text-sm text-ink-60 mb-3">
+              Real estate license: <span className="text-ink">{license}</span>
+            </p>
+          )}
+          {links.length > 0 && (
+            <ul className="flex flex-wrap gap-2">
+              {links.map((l) => (
+                <li key={l.url}>
+                  <a
+                    href={l.url}
+                    target="_blank"
+                    rel="noopener"
+                    className="inline-block px-3 py-1.5 border hairline text-sm hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors"
+                  >
+                    {agentName} on {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       <section className="border-t hairline pt-8">
         <h2 className="font-display text-xl mb-4">Contact</h2>
         <address className="not-italic text-sm leading-relaxed text-ink-60">
           <div className="font-semibold text-ink">{agentName}</div>
           {profile.brokerage && <div>{profile.brokerage}</div>}
-          {profile.street_address && <div>{profile.street_address}</div>}
-          {(profile.city || profile.state || profile.postal_code) && (
+          {(profile.city || profile.state) && (
             <div>
-              {profile.city}{profile.city && profile.state ? ", " : ""}{profile.state}{" "}
-              {profile.postal_code}
+              {profile.city}{profile.city && profile.state ? ", " : ""}{profile.state}
             </div>
           )}
           {profile.phone_e164 && (

@@ -16,12 +16,16 @@ export type PublicClientProfile = {
   brokerage_story: string | null;
   differentiators: string | null;
   property_types: string[];
-  // Phase 2 NAP fields (requires public_client_profile view to be updated)
-  phone_e164: string | null;
-  street_address: string | null;
-  city: string | null;
-  state: string | null;
-  postal_code: string | null;
+  // Public NAP is phone + city + state only. The street address and postal
+  // code on file are the agent's HOME address and are deliberately not part
+  // of this type: they must never be exposed by the view or rendered.
+  // All optional: present only once the view exposes them.
+  phone_e164?: string | null;
+  city?: string | null;
+  state?: string | null;
+  gbp_url?: string | null;
+  license_number?: string | null;
+  profile_links?: string[] | null;
 };
 
 export type PublicClientSite = {
