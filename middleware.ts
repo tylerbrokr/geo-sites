@@ -21,8 +21,7 @@ export function middleware(req: NextRequest) {
   if (
     url.pathname.startsWith("/_next") ||
     url.pathname.startsWith("/api/revalidate") ||
-    url.pathname === "/favicon.ico" ||
-    url.pathname === "/robots.txt"
+    url.pathname === "/favicon.ico"
   ) {
     return NextResponse.next();
   }

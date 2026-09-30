@@ -28,7 +28,10 @@ export async function getMarket(clientId: string): Promise<PublicClientMarket | 
 export async function getSiteCopy(clientId: string): Promise<SiteCopy | null> {
   const { data } = await supabasePublic()
     .from("public_site_copy")
-    .select("client_id, tagline, bio_short, bio_long, ideal_client_blurb, area_blurb, meta_title, meta_description, og_image_url")
+    // "*" on purpose: naming a column the view doesn't expose (og_image_url)
+    // made the whole query error, which silently blanked every site's tagline,
+    // bios, title, and description.
+    .select("*")
     .eq("client_id", clientId)
     .maybeSingle<SiteCopy>();
   return data ?? null;
