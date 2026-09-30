@@ -76,8 +76,37 @@ export type SiteCopy = {
   og_image_url: string | null;
 };
 
+// An official Census geography an area was matched to.
+export type GeoPlace = {
+  geo_id: string;
+  geo_type: "place" | "cousub" | "county" | "nation";
+  name: string;
+  base_name: string;
+  state_name: string | null;
+  state_abbr: string | null;
+  county_geo_id: string | null;
+  county_name: string | null;
+};
+
+// One sourced, dated government statistic.
+export type AreaFact = {
+  geo_id: string;
+  metric: string;
+  value: number | null;
+  display: string;
+  label: string;
+  source: string;
+  source_url: string | null;
+  period: string;
+};
+
+export type AreaFacts = { place: GeoPlace | null; rows: AreaFact[] };
+
 // Phase 2: Per-area landing pages exposed via public_client_areas view.
 export type PublicClientArea = {
+  // Present once the view exposes them.
+  geo_id?: string | null;
+  geo_status?: "resolved" | "inherited" | "unresolved" | null;
   client_id: string;
   slug: string;
   area_type: "city" | "neighborhood" | "county";

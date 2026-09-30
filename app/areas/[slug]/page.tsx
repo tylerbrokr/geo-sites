@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
-import { getProfile, getArea, listPosts } from "@/lib/queries";
+import { getProfile, getArea, getAreaFacts, listPosts } from "@/lib/queries";
 
 export const runtime = "edge";
 
@@ -38,6 +38,15 @@ export default async function AreaPage({ params }: Props) {
   ]);
   if (!area) notFound();
 
+  const facts = await getAreaFacts(area.geo_id);
+  // For a neighborhood the figures describe its parent city.
+  const factsPlace = facts.place
+    ? facts.place.geo_type === "county"
+      ? facts.place.name
+      : facts.place.base_name + (facts.place.state_abbr ? ", " + facts.place.state_abbr : "")
+    : "";
+  const factSources = [...new Map(facts.rows.map((f) => [f.source, f.source_url])).entries()];
+
   const agentName =
     resolved.site.agent_display_name || profile?.business_name || profile?.brokerage;
   const hostname = canonicalHost(resolved.site);
@@ -55,6 +64,14 @@ export default async function AreaPage({ params }: Props) {
         name: areaLabel,
         containedInPlace: area.state
           ? { "@type": "AdministrativeArea", name: area.state }
+          : undefined,
+        additionalProperty: facts.rows.length
+          ? facts.rows.map((f) => ({
+              "@type": "PropertyValue",
+              name: area.area_type === "neighborhood" ? `${f.label} (${factsPlace})` : f.label,
+              value: f.display,
+              description: `${f.source}, ${f.period}`,
+            }))
           : undefined,
       },
       {
@@ -110,6 +127,41 @@ export default async function AreaPage({ params }: Props) {
           {marketParagraphs.map((p, i) => (
             <p key={i} className="mb-4">{p}</p>
           ))}
+        </section>
+      )}
+
+      {facts.rows.length > 0 && (
+        <section className="mb-12">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--brand-accent)] mb-2">By the numbers</p>
+          <h2 className="font-display text-2xl mb-3">{factsPlace} at a glance</h2>
+          {area.area_type === "neighborhood" && (
+            <p className="text-sm text-ink-60 mb-4">
+              {area.name} is in {factsPlace}. These figures are for {factsPlace} as a whole.
+            </p>
+          )}
+          <table className="w-full text-sm">
+            <tbody>
+              {facts.rows.map((f) => (
+                <tr key={f.geo_id + f.metric} className="border-t hairline">
+                  <th scope="row" className="text-left font-normal py-2.5 pr-4">
+                    <span className="text-ink-80">{f.label}</span>
+                    <span className="block text-xs text-ink-40">{f.period}</span>
+                  </th>
+                  <td className="py-2.5 text-right font-semibold whitespace-nowrap align-top">{f.display}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-3 text-xs text-ink-40 leading-relaxed">
+            Sources:{" "}
+            {factSources.map(([source, url], i) => (
+              <span key={source}>
+                {i > 0 && "; "}
+                {url ? <a href={url} target="_blank" rel="noopener" className="underline">{source}</a> : source}
+              </span>
+            ))}
+            . Published estimates for the area as a whole, not a valuation of any property.
+          </p>
         </section>
       )}
 
