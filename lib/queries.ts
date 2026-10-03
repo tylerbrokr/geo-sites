@@ -128,3 +128,15 @@ export async function getPost(clientId: string, slug: string): Promise<PublicPos
     .maybeSingle<PublicPost>();
   return data ?? null;
 }
+
+// Platform-wide public settings (today: the Bing Webmaster verification
+// code, which is one value for the whole account). Missing view or key
+// returns null so a site never fails to render over it.
+export async function getPlatformSetting(key: string): Promise<string | null> {
+  const { data } = await supabasePublic()
+    .from("public_platform_settings")
+    .select("value")
+    .eq("key", key)
+    .maybeSingle<{ value: string | null }>();
+  return data?.value ?? null;
+}
