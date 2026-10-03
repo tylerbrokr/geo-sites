@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextFetchEvent, NextRequest, NextResponse } from "next/server";
+import { classifyVisit } from "./lib/visit-log";
 
 const PARENT = (process.env.NEXT_PUBLIC_SITES_PARENT_DOMAIN || "sites.geoemployee.com").toLowerCase();
 
@@ -12,8 +13,13 @@ const PARENT = (process.env.NEXT_PUBLIC_SITES_PARENT_DOMAIN || "sites.geoemploye
  *    pages can read it without re-parsing. Actual client_id resolution happens
  *    inside Server Components via lib/resolve-host.ts (so we hit Supabase
  *    once per request through Next's data cache, not twice).
+ *
+ * 3. Proof log. A request from an AI crawler, a search crawler, or a person
+ *    an AI assistant or search engine sent here is recorded in site_visits
+ *    (host, path, kind, agent only; no IP, no raw user agent). Fire and
+ *    forget: the response never waits on it.
  */
-export function middleware(req: NextRequest) {
+export function middleware(req: NextRequest, event: NextFetchEvent) {
   const url = req.nextUrl;
   const host = (req.headers.get("x-forwarded-host") || req.headers.get("host") || "").split(":")[0].toLowerCase();
 
@@ -34,7 +40,19 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl, 301);
   }
 
-   const requestHeaders = new Headers(req.headers);
+  const visit = classifyVisit(req.headers.get("user-agent"), req.headers.get("referer"));
+  if (visit && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    event.waitUntil(
+      fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/site_visits`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: anon, Authorization: `Bearer ${anon}`, Prefer: "return=minimal" },
+        body: JSON.stringify({ host, path: url.pathname.slice(0, 512), kind: visit.kind, agent: visit.agent }),
+      }).catch(() => {}),
+    );
+  }
+
+  const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-resolved-host", host);
   const res = NextResponse.next({ request: { headers: requestHeaders } });
   res.headers.set("x-resolved-host", host);
