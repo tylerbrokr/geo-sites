@@ -37,6 +37,8 @@ export type PublicClientSite = {
   agent_display_name: string | null;
   // Added when Lovable migration adds indexnow_key to client_sites + public_client_site view
   indexnow_key: string | null;
+  // Google Site Verification META token, issued per site by register-search-engines.
+  google_verification_token?: string | null;
 };
 
 export type PublicClientMarket = {
