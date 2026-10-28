@@ -8,6 +8,7 @@ import type {
   AreaFact,
   AreaFacts,
   GeoPlace,
+  PublicClientPositioning,
 } from "@/types/db";
 
 export async function getProfile(clientId: string): Promise<PublicClientProfile | null> {
@@ -38,6 +39,18 @@ export async function getSiteCopy(clientId: string): Promise<SiteCopy | null> {
     .eq("client_id", clientId)
     .maybeSingle<SiteCopy>();
   return data ?? null;
+}
+
+// The specialist worksheet. Null when the agent hasn't filled it in or the
+// view doesn't exist yet, so a site never fails to render over it.
+export async function getPositioning(clientId: string): Promise<PublicClientPositioning | null> {
+  const { data } = await supabasePublic()
+    .from("public_client_positioning")
+    .select("*")
+    .eq("client_id", clientId)
+    .maybeSingle<PublicClientPositioning>();
+  if (!data || !(data.niche ?? "").trim()) return null;
+  return data;
 }
 
 export async function listAreas(clientId: string): Promise<PublicClientArea[]> {

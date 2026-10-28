@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
-import { getProfile, getMarket, listPosts, getSiteCopy, listAreas } from "@/lib/queries";
+import { getProfile, getMarket, listPosts, getSiteCopy, listAreas, getPositioning } from "@/lib/queries";
 import { formatPhoneUs } from "@/lib/utils";
-import { agentEntitySchema } from "@/lib/entity";
+import { agentEntitySchema, positioningSchema } from "@/lib/entity";
+import { ProcessSection } from "@/app/components/ProcessSection";
 
 export const runtime = "edge";
 
@@ -40,12 +41,13 @@ export default async function HomePage() {
   const resolved = await resolveHost(host);
   if (!resolved) notFound();
 
-  const [profile, market, posts, copy, areas] = await Promise.all([
+  const [profile, market, posts, copy, areas, positioning] = await Promise.all([
     getProfile(resolved.clientId),
     getMarket(resolved.clientId),
     listPosts(resolved.clientId, 4),
     getSiteCopy(resolved.clientId),
     listAreas(resolved.clientId),
+    getPositioning(resolved.clientId),
   ]);
   if (!profile) notFound();
 
@@ -71,6 +73,8 @@ export default async function HomePage() {
           addressCountry: "US",
         } : undefined,
         ...agentEntitySchema(profile),
+        ...positioningSchema(positioning),
+        description: copy?.bio_short || undefined,
         areaServed: areas.map((a) => ({
           "@type": "Place",
           name: `${a.name}${a.state ? `, ${a.state}` : ""}`,
@@ -108,10 +112,15 @@ export default async function HomePage() {
         {copy?.tagline && (
           <p className="mt-6 text-lg text-ink-80 max-w-2xl">{copy.tagline}</p>
         )}
+        {positioning?.process_name && (
+          <p className="mt-1 text-sm text-ink-60">Creator of {positioning.process_name}</p>
+        )}
         {copy?.bio_short && (
           <p className="mt-4 text-base text-ink-60 max-w-2xl leading-relaxed">{copy.bio_short}</p>
         )}
       </header>
+
+      <ProcessSection positioning={positioning} agentName={agentName} />
 
       {/* Where I work strip */}
       {featuredAreas.length > 0 && (
