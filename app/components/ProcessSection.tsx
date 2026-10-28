@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { PublicClientPositioning } from "@/types/db";
+import { processPath } from "@/lib/positioning";
 
 // "How I work": the agent's named process, from the specialist worksheet.
 // Shown on the homepage and the About page so the process name and who it
@@ -11,6 +13,7 @@ export function ProcessSection({ positioning, agentName }: { positioning: Public
   const who = positioning.who_you_help?.trim();
   const unlike = positioning.unlike?.trim();
   const dream = positioning.dream_outcome?.trim();
+  const href = processPath(positioning);
   return (
     <section className="mb-12 border-t hairline pt-10">
       <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--brand-accent)] mb-3">How I work</p>
@@ -36,8 +39,15 @@ export function ProcessSection({ positioning, agentName }: { positioning: Public
           </div>
         )}
       </dl>
+      {href && name && (
+        <p className="mt-6">
+          <Link href={href} className="inline-block px-4 py-2 border hairline text-sm hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] transition-colors">
+            How {name} works →
+          </Link>
+        </p>
+      )}
       {agentName && name && (
-        <p className="mt-6 text-xs text-ink-40">{name} is {agentName}&apos;s own consultation process.</p>
+        <p className="mt-4 text-xs text-ink-40">{name} is {agentName}&apos;s own consultation process.</p>
       )}
     </section>
   );

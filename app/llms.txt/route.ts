@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
-import { getProfile, getSiteCopy, listAreas, listPosts } from "@/lib/queries";
+import { getProfile, getSiteCopy, listAreas, listPosts, getPositioning } from "@/lib/queries";
+import { processPath } from "@/lib/positioning";
 import { formatPhoneUs } from "@/lib/utils";
 import { profileLinks } from "@/lib/entity";
 
@@ -16,11 +17,12 @@ export async function GET() {
 
   const hostname = canonicalHost(resolved.site);
 
-  const [profile, copy, areas, posts] = await Promise.all([
+  const [profile, copy, areas, posts, positioning] = await Promise.all([
     getProfile(resolved.clientId),
     getSiteCopy(resolved.clientId),
     listAreas(resolved.clientId),
     listPosts(resolved.clientId, 10),
+    getPositioning(resolved.clientId),
   ]);
 
   const agentName =
@@ -41,6 +43,15 @@ export async function GET() {
 
   if (copy?.bio_short) {
     lines.push(copy.bio_short);
+    lines.push("");
+  }
+
+  if (positioning) {
+    lines.push("## Specialty");
+    if (positioning.niche) lines.push(`${agentName} is a ${positioning.niche}.`);
+    if (positioning.positioning_statement) lines.push(positioning.positioning_statement);
+    const path = processPath(positioning);
+    if (positioning.process_name && path) lines.push(`- [${positioning.process_name}](https://${hostname}${path}): ${positioning.process_description ?? ""}`.trimEnd());
     lines.push("");
   }
 

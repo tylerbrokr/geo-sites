@@ -5,9 +5,11 @@ import { formatPhoneUs } from "@/lib/utils";
 type Props = {
   site: PublicClientSite;
   profile: PublicClientProfile | null;
+  // The agent's specialty page, when they have a named process.
+  processLink?: { href: string; label: string } | null;
 };
 
-export default function SiteHeader({ site, profile }: Props) {
+export default function SiteHeader({ site, profile, processLink }: Props) {
   const agentName = site.agent_display_name || profile?.business_name || profile?.brokerage || "";
 
   return (
@@ -28,6 +30,9 @@ export default function SiteHeader({ site, profile }: Props) {
 
         {/* Right: nav + phone */}
         <nav className="flex items-center gap-6 shrink-0 text-sm">
+          {processLink && (
+            <Link href={processLink.href} className="text-ink-60 hover:text-ink transition-colors hidden sm:block truncate max-w-[220px]">{processLink.label}</Link>
+          )}
           <Link href="/about" className="text-ink-60 hover:text-ink transition-colors hidden sm:block">About</Link>
           <Link href="/blog" className="text-ink-60 hover:text-ink transition-colors hidden sm:block">Blog</Link>
           {profile?.phone_e164 && (
@@ -44,6 +49,7 @@ export default function SiteHeader({ site, profile }: Props) {
       {/* Mobile nav row */}
       <div className="sm:hidden">
         <div className="mx-auto max-w-[1100px] px-6 py-2 flex gap-5 text-sm text-ink-60">
+          {processLink && <Link href={processLink.href} className="hover:text-ink transition-colors truncate">{processLink.label}</Link>}
           <Link href="/about" className="hover:text-ink transition-colors">About</Link>
           <Link href="/blog" className="hover:text-ink transition-colors">Blog</Link>
         </div>

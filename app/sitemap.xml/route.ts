@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
-import { listPosts, listAreas } from "@/lib/queries";
+import { listPosts, listAreas, getPositioning } from "@/lib/queries";
+import { processPath } from "@/lib/positioning";
 
 export const runtime = "edge";
 
@@ -20,14 +21,17 @@ export async function GET() {
   }
 
   const hostname = canonicalHost(resolved.site);
-  const [posts, areas] = await Promise.all([
+  const [posts, areas, positioning] = await Promise.all([
     listPosts(resolved.clientId, 100),
     listAreas(resolved.clientId),
+    getPositioning(resolved.clientId),
   ]);
+  const specialty = processPath(positioning);
 
   const allUrls: SitemapUrl[] = [
     { loc: "/", changefreq: "weekly", priority: "1.0" },
     { loc: "/about", changefreq: "monthly", priority: "0.8" },
+    ...(specialty ? [{ loc: specialty, lastmod: positioning?.updated_at ? positioning.updated_at.slice(0, 10) : undefined, changefreq: "monthly", priority: "0.9" }] : []),
     { loc: "/blog", changefreq: "weekly", priority: "0.9" },
     ...areas.map((a) => ({
       loc: "/areas/" + a.slug,
