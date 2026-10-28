@@ -121,3 +121,21 @@ export type PublicClientArea = {
   meta_description: string;
   updated_at: string | null;
 };
+
+// Positioning phase 2: the specialist worksheet, exposed via
+// public_client_positioning (live sites only). Every field may be empty.
+export type PublicClientPositioning = {
+  client_id: string;
+  niche: string | null;
+  who_you_help: string | null;
+  outcome: string | null;
+  dread: string | null;
+  unlike: string | null;
+  process_name: string | null;
+  process_description: string | null;
+  dream_outcome: string | null;
+  i_help: string | null;
+  positioning_line: string | null;
+  positioning_statement: string | null;
+  updated_at: string | null;
+};

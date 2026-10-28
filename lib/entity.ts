@@ -1,4 +1,4 @@
-import type { PublicClientProfile } from "@/types/db";
+import type { PublicClientProfile, PublicClientPositioning } from "@/types/db";
 
 // The agent's presence elsewhere on the web: Google Business Profile, Zillow,
 // Realtor.com, their brokerage page, and so on. Linking these (visibly and as
@@ -60,6 +60,31 @@ export function agentEntitySchema(profile: PublicClientProfile | null | undefine
     sameAs: links.length ? links.map((l) => l.url) : undefined,
     identifier: license
       ? { "@type": "PropertyValue", name: "Real estate license", value: license }
+      : undefined,
+  };
+}
+
+// What the agent specializes in and the process they offer, for the same
+// RealEstateAgent node. knowsAbout carries the niche in the exact words the
+// site and the agent's profiles use; the process is listed as a Service.
+export function positioningSchema(positioning: PublicClientPositioning | null | undefined) {
+  if (!positioning) return {};
+  const niche = positioning.niche?.trim();
+  const processName = positioning.process_name?.trim();
+  const processDescription = positioning.process_description?.trim();
+  return {
+    knowsAbout: niche ? [niche] : undefined,
+    slogan: niche || undefined,
+    makesOffer: processName
+      ? {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: processName,
+            description: processDescription || undefined,
+            serviceType: niche || undefined,
+          },
+        }
       : undefined,
   };
 }

@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
-import { getProfile, getSiteCopy, listAreas } from "@/lib/queries";
+import { getProfile, getSiteCopy, listAreas, getPositioning } from "@/lib/queries";
 import { formatPhoneUs } from "@/lib/utils";
-import { agentEntitySchema, profileLinks } from "@/lib/entity";
+import { agentEntitySchema, profileLinks, positioningSchema } from "@/lib/entity";
+import { ProcessSection } from "@/app/components/ProcessSection";
 
 export const runtime = "edge";
 
@@ -44,10 +45,11 @@ export default async function AboutPage() {
   const resolved = await resolveHost(host);
   if (!resolved) notFound();
 
-  const [profile, copy, areas] = await Promise.all([
+  const [profile, copy, areas, positioning] = await Promise.all([
     getProfile(resolved.clientId),
     getSiteCopy(resolved.clientId),
     listAreas(resolved.clientId),
+    getPositioning(resolved.clientId),
   ]);
   if (!profile) notFound();
 
@@ -77,6 +79,8 @@ export default async function AboutPage() {
               }
             : undefined,
         ...agentEntitySchema(profile),
+        ...positioningSchema(positioning),
+        description: copy?.bio_short || undefined,
         areaServed: areas.map((a) => ({
           "@type": "Place",
           name: a.name + (a.state ? ", " + a.state : ""),
@@ -124,6 +128,7 @@ export default async function AboutPage() {
           {/* Decorative rule: 2px, 24px wide */}
           <div className="mt-3 mb-3 h-[2px] w-6 bg-[var(--brand-accent)]" />
           {profile.brokerage && <p className="text-lg text-ink-60">{profile.brokerage}</p>}
+          {positioning?.niche && <p className="mt-2 text-base text-ink-80">{positioning.niche}</p>}
           {profile.years_experience && (
             <p className="mt-1 text-sm text-ink-60">{profile.years_experience} years in real estate</p>
           )}
@@ -137,6 +142,8 @@ export default async function AboutPage() {
           ))}
         </section>
       )}
+
+      <ProcessSection positioning={positioning} agentName={agentName} />
 
       {areas.length > 0 && (
         <section className="mb-12">
