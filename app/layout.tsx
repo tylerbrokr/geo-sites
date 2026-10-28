@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import { headers } from "next/headers";
 import { resolveHost } from "@/lib/resolve-host";
-import { getPlatformSetting, getProfile, getSiteCopy, listAreas, listPosts } from "@/lib/queries";
+import { getPlatformSetting, getProfile, getSiteCopy, listAreas, listPosts, getPositioning } from "@/lib/queries";
+import { processPath } from "@/lib/positioning";
 import { readableForeground } from "@/lib/utils";
 import SiteHeader from "@/app/components/SiteHeader";
 import SiteFooter from "@/app/components/SiteFooter";
@@ -60,13 +61,18 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   let profile = null;
   let areas: Awaited<ReturnType<typeof listAreas>> = [];
   let recentPosts: Awaited<ReturnType<typeof listPosts>> = [];
+  let processLink: { href: string; label: string } | null = null;
 
   if (resolved) {
-    [profile, areas, recentPosts] = await Promise.all([
+    let positioning: Awaited<ReturnType<typeof getPositioning>> = null;
+    [profile, areas, recentPosts, positioning] = await Promise.all([
       getProfile(resolved.clientId),
       listAreas(resolved.clientId),
       listPosts(resolved.clientId, 5),
+      getPositioning(resolved.clientId),
     ]);
+    const href = processPath(positioning);
+    if (href && positioning?.process_name) processLink = { href, label: positioning.process_name.trim() };
     if (profile?.primary_color) {
       brandPrimary = profile.primary_color;
       brandOnPrimary = readableForeground(profile.primary_color);
@@ -87,7 +93,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     >
       <body className="font-sans bg-canvas text-ink flex flex-col min-h-screen">
         {resolved && (
-          <SiteHeader site={resolved.site} profile={profile} />
+          <SiteHeader site={resolved.site} profile={profile} processLink={processLink} />
         )}
         <div className="flex-1">{children}</div>
         {resolved && (
