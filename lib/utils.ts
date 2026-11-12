@@ -81,3 +81,12 @@ export function linkAreasInMarkdown(
   }
   return result;
 }
+
+// Intake stores experience as a phrase that already says "year"
+// ("1–3 years", "10+ years", "Less than 1 year"); older rows may hold a
+// bare number ("12"). Never print "years years".
+export function formatExperience(raw: string | null | undefined): string | null {
+  const v = (raw ?? "").trim();
+  if (!v) return null;
+  return /\byears?\b/i.test(v) ? `${v} in real estate` : `${v} years in real estate`;
+}
