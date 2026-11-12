@@ -53,13 +53,22 @@ export async function getPositioning(clientId: string): Promise<PublicClientPosi
   return data;
 }
 
+// County areas are stored without the word "County" (e.g. "Lee"), which read
+// as "Lee, Florida" on the site. Add it when it is missing.
+function withCountyLabel(a: PublicClientArea): PublicClientArea {
+  if (a.area_type === "county" && !/\bcounty\b|\bparish\b/i.test(a.name)) {
+    return { ...a, name: `${a.name} County` };
+  }
+  return a;
+}
+
 export async function listAreas(clientId: string): Promise<PublicClientArea[]> {
   const { data } = await supabasePublic()
     .from("public_client_areas")
     .select("client_id, slug, area_type, name, state, intro, market_blurb, faqs, meta_title, meta_description, updated_at")
     .eq("client_id", clientId)
     .order("name", { ascending: true });
-  return (data ?? []) as PublicClientArea[];
+  return ((data ?? []) as PublicClientArea[]).map(withCountyLabel);
 }
 
 export async function getArea(clientId: string, slug: string): Promise<PublicClientArea | null> {
@@ -71,7 +80,7 @@ export async function getArea(clientId: string, slug: string): Promise<PublicCli
     .eq("client_id", clientId)
     .eq("slug", slug)
     .maybeSingle<PublicClientArea>();
-  return data ?? null;
+  return data ? withCountyLabel(data) : null;
 }
 
 // Display order for the "at a glance" table. Anything not listed is omitted.
