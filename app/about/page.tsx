@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getProfile, getSiteCopy, listAreas, getPositioning } from "@/lib/queries";
-import { formatPhoneUs } from "@/lib/utils";
+import { formatPhoneUs, formatExperience } from "@/lib/utils";
 import { agentEntitySchema, profileLinks, positioningSchema } from "@/lib/entity";
 import { ProcessSection } from "@/app/components/ProcessSection";
 
@@ -129,8 +129,8 @@ export default async function AboutPage() {
           <div className="mt-3 mb-3 h-[2px] w-6 bg-[var(--brand-accent)]" />
           {profile.brokerage && <p className="text-lg text-ink-60">{profile.brokerage}</p>}
           {positioning?.niche && <p className="mt-2 text-base text-ink-80">{positioning.niche}</p>}
-          {profile.years_experience && (
-            <p className="mt-1 text-sm text-ink-60">{profile.years_experience} years in real estate</p>
+          {formatExperience(profile.years_experience) && (
+            <p className="mt-1 text-sm text-ink-60">{formatExperience(profile.years_experience)}</p>
           )}
         </div>
       </header>
