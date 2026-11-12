@@ -130,7 +130,7 @@ export default async function AboutPage() {
           {profile.brokerage && <p className="text-lg text-ink-60">{profile.brokerage}</p>}
           {positioning?.niche && <p className="mt-2 text-base text-ink-80">{positioning.niche}</p>}
           {profile.years_experience && (
-            <p className="mt-1 text-sm text-ink-60">{profile.years_experience} years in real estate</p>
+            <p className="mt-1 text-sm text-ink-60">{/year/i.test(profile.years_experience) ? profile.years_experience : `${profile.years_experience} years`} in real estate</p>
           )}
         </div>
       </header>
