@@ -90,3 +90,9 @@ export function formatExperience(raw: string | null | undefined): string | null 
   if (!v) return null;
   return /\byears?\b/i.test(v) ? `${v} in real estate` : `${v} years in real estate`;
 }
+
+// The agent's public contact email, only when it looks like an address.
+export function publicEmail(raw: string | null | undefined): string | null {
+  const v = (raw ?? "").trim();
+  return /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]{2,}$/.test(v) ? v : null;
+}

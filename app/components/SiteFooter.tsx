@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { PublicClientSite, PublicClientProfile, PublicClientArea, PublicPost } from "@/types/db";
-import { formatPhoneUs } from "@/lib/utils";
+import { formatPhoneUs, publicEmail } from "@/lib/utils";
 import { profileLinks } from "@/lib/entity";
 
 type Props = {
@@ -44,6 +44,13 @@ export default function SiteFooter({ site, profile, areas, recentPosts }: Props)
                     className="hover:text-[var(--brand-primary)] transition-colors"
                   >
                     {formatPhoneUs(profile.phone_e164)}
+                  </a>
+                </div>
+              )}
+              {publicEmail(profile?.public_email) && (
+                <div className="mt-1">
+                  <a href={"mailto:" + publicEmail(profile?.public_email)} className="hover:text-[var(--brand-primary)] transition-colors">
+                    {publicEmail(profile?.public_email)}
                   </a>
                 </div>
               )}

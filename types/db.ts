@@ -26,6 +26,8 @@ export type PublicClientProfile = {
   gbp_url?: string | null;
   license_number?: string | null;
   profile_links?: string[] | null;
+  // The address the agent wants clients to use (not their login email).
+  public_email?: string | null;
 };
 
 export type PublicClientSite = {

@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getProfile, getSiteCopy, listAreas, listPosts, getPositioning } from "@/lib/queries";
 import { processPath } from "@/lib/positioning";
-import { formatPhoneUs } from "@/lib/utils";
+import { formatPhoneUs, publicEmail } from "@/lib/utils";
 import { profileLinks } from "@/lib/entity";
 
 export const runtime = "edge";
@@ -62,10 +62,11 @@ export async function GET() {
   }
 
   // NAP block
-  const hasNap = profile?.phone_e164 || profile?.city;
+  const hasNap = profile?.phone_e164 || profile?.city || publicEmail(profile?.public_email);
   if (hasNap) {
     lines.push("## Contact");
     if (profile?.phone_e164) lines.push(`- Phone: ${formatPhoneUs(profile.phone_e164)}`);
+    if (publicEmail(profile?.public_email)) lines.push(`- Email: ${publicEmail(profile?.public_email)}`);
     const locationParts = [profile?.city, profile?.state].filter(Boolean);
     if (locationParts.length > 0) lines.push(`- Location: ${locationParts.join(", ")}`);
     lines.push("");
