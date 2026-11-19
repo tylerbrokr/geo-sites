@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getProfile, getSiteCopy, getPositioning, listAreas } from "@/lib/queries";
-import { formatPhoneUs } from "@/lib/utils";
+import { formatPhoneUs, publicEmail } from "@/lib/utils";
 import { agentEntitySchema, positioningSchema } from "@/lib/entity";
 import { processSlug, processPath, processFaqs } from "@/lib/positioning";
 
@@ -74,6 +74,7 @@ export default async function ProcessPage({ params }: { params: Promise<{ slug: 
         name: agentName,
         image: profile.headshot_url || undefined,
         telephone: profile.phone_e164 || undefined,
+        email: publicEmail(profile.public_email) || undefined,
         url: `https://${hostname}/`,
         ...agentEntitySchema(profile),
         ...positioningSchema(positioning),
@@ -184,6 +185,9 @@ export default async function ProcessPage({ params }: { params: Promise<{ slug: 
           {location && <div>{location}</div>}
           {profile.phone_e164 && (
             <div><a href={"tel:" + profile.phone_e164} className="hover:text-ink transition-colors">{formatPhoneUs(profile.phone_e164)}</a></div>
+          )}
+          {publicEmail(profile.public_email) && (
+            <div><a href={"mailto:" + publicEmail(profile.public_email)} className="hover:text-ink transition-colors">{publicEmail(profile.public_email)}</a></div>
           )}
         </address>
         <p className="mt-4 text-xs text-ink-60"><Link href="/about" className="hover:text-ink transition-colors">About {agentName}</Link></p>

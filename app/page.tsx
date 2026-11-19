@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { resolveHost, canonicalHost } from "@/lib/resolve-host";
 import { getProfile, getMarket, listPosts, getSiteCopy, listAreas, getPositioning } from "@/lib/queries";
-import { formatPhoneUs } from "@/lib/utils";
+import { formatPhoneUs, publicEmail } from "@/lib/utils";
 import { agentEntitySchema, positioningSchema } from "@/lib/entity";
 import { ProcessSection } from "@/app/components/ProcessSection";
 
@@ -65,6 +65,7 @@ export default async function HomePage() {
         image: profile.headshot_url || undefined,
         logo: profile.logo_url || undefined,
         telephone: profile.phone_e164 || undefined,
+        email: publicEmail(profile.public_email) || undefined,
         url: `https://${hostname}/`,
         address: (profile.city || profile.state) ? {
           "@type": "PostalAddress",
@@ -199,6 +200,13 @@ export default async function HomePage() {
             <div>
               <a href={`tel:${profile.phone_e164}`} className="hover:text-ink transition-colors">
                 {formatPhoneUs(profile.phone_e164)}
+              </a>
+            </div>
+          )}
+          {publicEmail(profile.public_email) && (
+            <div>
+              <a href={"mailto:" + publicEmail(profile.public_email)} className="hover:text-ink transition-colors">
+                {publicEmail(profile.public_email)}
               </a>
             </div>
           )}
